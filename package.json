@@ -1,29 +1,34 @@
 {
   "name": "@basementscripts/dynamodb-utils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Utils for DynamoDB",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "directories": {
-    "lib": "lib",
+    "lib": "dist",
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "dist"
   ],
   "scripts": {
     "build": "yarn tsc",
-    "tsc": "rm -rf lib && tsc",
+    "tsc": "rm -rf dist && tsc",
+    "watch": "nodemon --watch src --ext ts --exec yarn tsc",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/basementscripts/dynamodb-utils.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "author": "BasementScripts <basementscripts.io@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^13.9.1",
+    "nodemon": "^2.0.2",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   },

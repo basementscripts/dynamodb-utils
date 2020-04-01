@@ -1,59 +1,64 @@
-import { PutItemInput } from 'aws-sdk/clients/dynamodb'
+import { PutItemInput, Key } from 'aws-sdk/clients/dynamodb'
 
-export type DynamoTable = {
+export interface DynamoTable {
     attributes: any
     readCapacity?: number
     writeCapacity?: number
 }
-
-export type Identifier = {
-    id: string
+export interface Identifier {
+    id?: string
 }
-
-export type Service = {
-    service: string
+export interface Service {
+    service?: string
 }
-
-export type TableOperation = {
+export interface TableOperation {
     tableName: string
-    index?: string
+    indexName?: string
 }
-
-export type IndexOption = {
+export interface IndexOption {
     pk?: string
 }
-
-export type QueryRequest = {
+export interface QueryRequest {
     query?: object
 }
-
-export type PartitionKey = {
-    key: string
+export interface PartitionKey {
+    // [key: string]: string
+    key?: Key
 }
-
-export type ParamRequest = {
+export interface ParamRequest {
     params: object
 }
-
-export type FilteredRequest = {
+export interface FilteredRequest {
     filters?: string[]
 }
+export interface ListOutput {
+    output?: string[]
+}
+export interface DynamoItemInput extends PutItemInput, Resource {}
+export interface Resource extends Identifier, Service {}
+export interface TableConfiguration extends TableOperation, IndexOption, DynamoTable {}
+export interface PutItemRequest extends TableOperation, ParamRequest {}
+export interface GetItemRequest extends TableOperation, PartitionKey {}
+export interface DeleteItemRequest extends TableOperation, PartitionKey {}
+export interface QueryItemRequest extends TableOperation, QueryRequest, ParamRequest {}
+export interface GetItemsRequest extends TableOperation, ParamRequest, FilteredRequest, ListOutput {}
 
-export type ListOutput = {
+export interface DynamoRequest {
+    tableName?: string
+    params?: any
     output?: string[]
 }
 
-export type DynamoItemInput = PutItemInput & Resource
-export type Resource = Identifier & Service
-export type TableConfiguration = TableOperation & IndexOption & DynamoTable
-export type PutItemRequest = TableOperation & ParamRequest
-export type GetItemRequest = TableOperation & PartitionKey
-export type DeleteItemRequest = TableOperation & PartitionKey
-export type QueryItemRequest = TableOperation & QueryRequest & ParamRequest
-export type GetItemsRequest  = TableOperation & ParamRequest & FilteredRequest & ListOutput
-
-export type DynamoRequest = {
+export interface EntityRequest {
     tableName: string
-    params: any
-    output?: string[]
+    key: EntityKey
+    params?: any
+    updatedAt?: number
+}
+export interface CreateEntityRequest extends EntityRequest {
+    createdAt?: number
+}
+export interface EntityKey {
+    key?: string
+    sort?: string
 }

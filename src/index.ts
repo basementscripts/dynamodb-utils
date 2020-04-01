@@ -15,9 +15,11 @@ import {
     GetItemRequest,
     DeleteItemRequest,
     QueryItemRequest,
-    GetItemsRequest
+    GetItemsRequest,
+    EntityRequest,
+    CreateEntityRequest,
+    EntityKey
 } from './types'
-
 import {
     buildPutInput,
     buildGetInput,
@@ -26,8 +28,12 @@ import {
     buildQueryInput,
     buildDeleteInput
 } from './utils'
+import {
+    DynamoDb
+} from './dynamodb'
 
 export {
+    DynamoDb,
     buildPutInput,
     buildGetInput,
     buildScanInput,
@@ -50,5 +56,8 @@ export {
     PutItemRequest,
     GetItemRequest,
     QueryItemRequest,
-    GetItemsRequest
+    GetItemsRequest,
+    EntityRequest,
+    CreateEntityRequest,
+    EntityKey
 }

@@ -24,19 +24,14 @@ export const buildPutInput = (request: PutItemRequest): PutItemInput => ({
     TableName: request.tableName,
     Item: request.params as PutItemInputAttributeMap
 })
-
 /**
  * Build Scan Input for Dynamo DB operation
  * @param {any} request 
  * @returns {ScanInput}
  */
 export const buildScanInput = (request: any): ScanInput => {
-    const options = {
-        TableName: request.tableName,
-        ProjectionExpression: '',
-        FilterExpression: '',
-        ExpressionAttributeNames: {},
-        ExpressionAttributeValues: {}
+    const options: ScanInput = {
+        TableName: request.tableName
     }
     const paramAttrs: string[] = Object.keys(request.params)
     const projection: string[] = []
@@ -63,19 +58,14 @@ export const buildScanInput = (request: any): ScanInput => {
 
     return options
 }
-
 /**
  * Build Update Item Input for Dynamo DB operation
  * @param request 
  */
 export const buildUpdateInput = (request: any): UpdateItemInput => {
-    const options = {
+    const options: UpdateItemInput = {
         TableName: request.tableName,
-        Key: {
-            id: request.key
-        },
-        UpdateExpression: '',
-        ExpressionAttributeValues: {},
+        Key: request.key,
         ReturnValues: 'ALL_NEW'
     }
     const updateExpressions: string[] = []
@@ -87,11 +77,10 @@ export const buildUpdateInput = (request: any): UpdateItemInput => {
         updateExpressions.push(`${attr} = ${filter}`)
     })
     const expressions = updateExpressions.join(', ')
-    options.UpdateExpression = `SET ${expressions}`
+    options.UpdateExpression = `SET #${expressions}`
 
     return options
 }
-
 /**
  * Build Query Item Input for dynamodb
  * @param {DeleteItemRequest} request 
@@ -102,11 +91,10 @@ export const buildUpdateInput = (request: any): UpdateItemInput => {
 export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
     const options: QueryInput = {
         TableName: request.tableName,
-        KeyConditionExpression: '',
         ExpressionAttributeValues: {}
     }
-    if(request.index) {
-        options.IndexName = request.index
+    if(request.indexName) {
+        options.IndexName = request.indexName
     }
     const keyExpressions: string[] = []
     const paramAttrs: string[] = Object.keys(request.params)
@@ -119,7 +107,6 @@ export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
     options.KeyConditionExpression = keyExpressions.join(' and ')
     return options;
 }
-
 /**
  * Build Delete Item Input for dynamodb
  * @param {DeleteItemRequest} request 
@@ -131,7 +118,6 @@ export const buildDeleteInput = (request: DeleteItemRequest): DeleteItemInput =>
     TableName: request.tableName,
     Key: keyInput(request.key)
 })
-
 /**
  * Build Get Item Input for dynamodb
  * @param {GetItemRequest} request 
@@ -141,9 +127,8 @@ export const buildDeleteInput = (request: DeleteItemRequest): DeleteItemInput =>
  */
 export const buildGetInput = (request: GetItemRequest): GetItemInput => ({
     TableName: request.tableName,
-    Key: keyInput(request.key)
+    Key: request.key
 })
-
 /**
  * 
  * @param {string|number} key 

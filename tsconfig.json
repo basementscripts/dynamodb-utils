@@ -10,7 +10,7 @@
         "esModuleInterop": true,
         "target": "es2017",
         // "sourceMap": true,
-        "outDir": "./lib",
+        "outDir": "./dist",
         "lib": [
             "es6",
             "dom"
