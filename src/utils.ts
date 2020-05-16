@@ -75,6 +75,8 @@ export const buildScanInput = (request: ScanInputRequest) => {
         } else if (typeof value === 'string') {
           filterExpressions.push(`${attr} = ${filter}`)
           options.ExpressionAttributeValues[filter] = value
+        } else if (typeof value === 'object') {
+          // TODO: conditional scan
         }
       }
     })
@@ -189,10 +191,14 @@ export const buildUpdateInput = (request: any): UpdateItemInput => {
 export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
   const options: QueryInput = {
     TableName: request.tableName,
+    IndexName: request.indexName,
     ExpressionAttributeValues: {}
   }
-  if (request.indexName) {
-    options.IndexName = request.indexName
+  if (request.limit) {
+    options.Limit = request.limit
+  }
+  if (request.nextToken) {
+    options.ExclusiveStartKey = request.nextToken
   }
   const keyExpressions: string[] = []
   const paramAttrs: string[] = Object.keys(request.params)

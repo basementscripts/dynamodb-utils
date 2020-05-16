@@ -31,6 +31,10 @@ export interface ParamRequest {
 export interface FilteredRequest {
   filters?: string[]
 }
+export interface PageableRequest {
+  limit?: number
+  nextToken?: Key
+}
 export interface ListOutput {
   output?: string[]
 }
@@ -46,7 +50,8 @@ export interface DeleteItemRequest extends TableOperation, PartitionKey {}
 export interface QueryItemRequest
   extends TableOperation,
     QueryRequest,
-    ParamRequest {}
+    ParamRequest,
+    PageableRequest {}
 export interface GetItemsRequest
   extends TableOperation,
     ParamRequest,
