@@ -1,6 +1,6 @@
 {
   "name": "@basementscripts/dynamodb-utils",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Utils for DynamoDB",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -20,9 +20,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/basementscripts/dynamodb-utils.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   },
   "author": "BasementScripts <basementscripts.io@gmail.com>",
   "license": "MIT",

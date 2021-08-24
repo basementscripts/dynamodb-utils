@@ -1,0 +1,39 @@
+name: Production Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['14']
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Package Development Dependencies
+        run: |
+          yarn install
+      - name: Production Build
+        run: |
+          yarn build
+      - name: Unit Test
+        run: |
+          yarn test
+      - name: Install Package Production Dependencies
+        run: |
+          yarn install --production
+      - name: Publish NPM
+        uses: JS-DevTools/npm-publish@v1
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
