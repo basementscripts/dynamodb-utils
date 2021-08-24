@@ -25,9 +25,9 @@ jobs:
       - name: Production Build
         run: |
           yarn build
-      - name: Unit Test
-        run: |
-          yarn test
+      # - name: Unit Test
+      #   run: |
+      #     yarn test
       - name: Install Package Production Dependencies
         run: |
           yarn install --production
