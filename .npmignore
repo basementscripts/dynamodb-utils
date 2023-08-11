@@ -2,3 +2,6 @@ src
 tsconfig.json
 yarn.lock
 .gitignore
+babel.config.js
+jest.config.js
+.github
