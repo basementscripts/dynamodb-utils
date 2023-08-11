@@ -1,6 +1,6 @@
 {
   "name": "@basementscripts/dynamodb-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utils for DynamoDB",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -38,5 +38,14 @@
     "make-coverage-badge": "^1.2.0",
     "nodemon": "^3.0.1",
     "typescript": "^5.1.6"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "useTabs": true,
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "flattenTernaries": true,
+    "printWidth": 100
   }
 }

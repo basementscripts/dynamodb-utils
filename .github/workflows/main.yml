@@ -32,7 +32,7 @@ jobs:
         run: |
           yarn install --production
       - name: Publish NPM
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v2
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
