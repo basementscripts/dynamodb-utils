@@ -22,9 +22,9 @@ import {
  * @param request
  * @returns {PutItemInput}
  */
-export const buildPutInput = (request: PutItemRequest): PutItemInput => ({
-	TableName: request.tableName,
-	Item: request.params as Record<string, AttributeValue> | undefined
+export const buildPutInput = ({ tableName, params }: PutItemRequest): PutItemInput => ({
+	TableName: tableName,
+	Item: params as Record<string, AttributeValue> | undefined
 })
 
 /**
