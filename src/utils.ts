@@ -84,7 +84,7 @@ export const buildScanInput = (request: ScanInputRequest) => {
 			}
 		})
 		// set the filter expression
-		options.FilterExpression = filterExpressions.join(', ')
+		options.FilterExpression = filterExpressions.join(' And ')
 	}
 	// check to see if there are different projection attributes
 	if (request.output) {
