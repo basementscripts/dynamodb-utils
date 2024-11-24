@@ -59,12 +59,17 @@ export interface GetItemsRequest
 		FilteredRequest,
 		ListOutput {}
 
+export interface ScanInputRequestOptions {
+	filterExpressionContext?: 'And' | 'Or'
+}
+
 export interface ScanInputRequest {
 	tableName?: string
 	startKey?: string
 	limit?: number
 	params?: any
 	output?: string[]
+	options?: ScanInputRequestOptions
 }
 
 export interface DynamoRequest {
