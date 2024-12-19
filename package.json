@@ -1,6 +1,6 @@
 {
   "name": "@basementscripts/dynamodb-utils",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Utils for DynamoDB",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

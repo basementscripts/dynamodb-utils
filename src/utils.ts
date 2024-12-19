@@ -53,17 +53,14 @@ export const buildScanInput = (request: ScanInputRequest) => {
 		options.ExpressionAttributeNames = {}
 		options.ExpressionAttributeValues = {}
 		// loop through the attributes and format the request
-		paramAttrs.forEach((attr: string) => {
+		paramAttrs.forEach((attr: string, index: number) => {
 			// create token string
 			const token: string = `#${attr}`
 			// push the token to the projection
 			projection.push(token)
 			// create filter string
-			let filter: string = `:${attr.charAt(0)}`
-			// check to see if the expression attributes already include filter
-			if (options.ExpressionAttributeValues.hasOwnProperty(filter)) {
-				filter = `:${attr.charAt(0)}${attr.charAt(1)}`
-			}
+			let filter: string = `:${attr.charAt(0)}${index}`
+
 			// add attribute to expressions
 			options.ExpressionAttributeNames[token] = attr
 			// set value cache
@@ -115,20 +112,16 @@ export const buildUpdateInput = (request: any): UpdateItemInput => {
 	const paramAttrs: string[] = Object.keys(request.params)
 	const expressionNames: any = {}
 
-	paramAttrs.forEach((attr: string) => {
-		let filter: string = `:${attr.charAt(0)}`
-		if (options.ExpressionAttributeValues.hasOwnProperty(filter)) {
-			filter = `:${attr.charAt(0)}${attr.charAt(1)}`
-		}
+	paramAttrs.forEach((attr: string, index: number) => {
+		// create expression attribute filter
+		let filter: string = `:${attr.charAt(0)}${index}`
+		// get and assign the value
 		const value = request.params[attr]
 		options.ExpressionAttributeValues[filter] = value
-
-		const isReservedWord = reservedWords.includes(attr)
-		let token = attr
-		if (isReservedWord) {
-			token = `#${attr}`
-			expressionNames[token] = attr
-		}
+		// create the expression token
+		const token = `#${attr}`
+		expressionNames[token] = attr
+		// push the expression to the update expressions
 		updateExpressions.push(`${token} = ${filter}`)
 	})
 	if (!isEmpty(expressionNames)) {
