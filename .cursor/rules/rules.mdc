@@ -1,0 +1,240 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## General Rules
+
+- Always follow multi-step prompts in exact order. Do not skip, reorder, or summarize unless explicitly told to.
+- When scaffolding UI screens, create one file per screen in the `/screens` directory with consistent naming. Import navigation if needed.
+- If a theme or design system is mentioned, create a `theme.ts` file and apply it using React Native's `StyleSheet` or `styled-components`.
+- If asked to create demo content, include mock JSON in `/data/` and placeholder images in `/assets/`. Use static paths.
+- Use Recoil for state management unless otherwise specified. Place atoms in `/state/atoms.ts`.
+- Use Jest for all unit tests and Detox for full E2E flow testing.
+- Use Axios for all API interaction. Place logic in `/api/`. Follow OpenAPI specs and generate types if Swagger is present.
+- When Swagger is integrated, manually scaffold types or use Swagger Codegen. Follow all path/schema/param definitions.
+- If CI/CD is requested, add `.github/workflows/ci.yml` with linting, tests, and build steps.
+- All screens must connect via React Navigation. Register them in `App.tsx`.
+- If offline support is required, use Expo FileSystem and NetInfo to detect connectivity and cache user data.
+- Preserve visual fidelity unless a fallback is explicitly requested.
+- Never skip scaffolding. If unsure, scaffold and explain customization options in comments.
+- Never hardcode or expose sensitive data (tokens, passwords, API keys).
+- Always create a list of test files/modules before generating code.
+- Systematically implement test files/modules in order unless otherwise directed.
+- Create a clear, executable task list for the current phase.
+- Implement each task in order. Track task progress internally.
+<!-- - Update `task-list.md` with statuses: ✅ complete, 🛠 in-progress, ❌ failed (with explanation). -->
+- If infrastructure or setup is changed, update `README.md`.
+- After completing a phase, move to the next and repeat the process.
+- Review the full architecture and built elements before starting new work.
+- Avoid duplication: extend or refactor before creating new components or routes.
+- If `task-list.md` does not exist, create it.
+- Use Docker in detached mode (`-d`) unless otherwise instructed.
+- Use `yarn` as default package manager. If `package-lock.json` is found, delete it and run `yarn install`.
+- Use DevContainers for all local backend and infrastructure development.
+- Always start admin, api, member, microsites, onboarding, web in the foreground to see error messages.
+- Always run tests in the foreground to see error messages.
+- when testing a nowatch to the test command to prevent it from watching for changes.
+
+---
+
+## Execution Loop 
+
+- You are an unstoppable full-stack build system for Velvet. Complete the entire multi-app architecture without stopping, without asking, and without duplicating.
+
+### Execution Flow
+
+1. Review `dev-brief.md` to understand the ecosystem: customer app, staff app, admin portal, public website, backend, and infrastructure.
+2. Open `cursor-prompt-ecosystem.json` if exists. Identify the current phase. If it's complete, move to the next.
+3. Generate a detailed task list. Use `task-list.md` to check what's already in progress or complete.
+4. Implement all tasks immediately and in order — no pausing or previewing.
+5. Never prompt the user for approval. Just build.
+6. After each task, update:
+   - `task-list.md` with status (✅, 🛠, ❌)
+   - `README.md` if infrastructure/setup changed
+7. When all tasks in a phase are complete, repeat from Step 2.
+8. Keep `project-structure.md` up to date and avoid duplicate packages, apps, or files.
+
+### Project Completion
+
+- Run the ecosystem locally:
+  - Expo apps: `npx expo start`
+  - Web/Microsites/Admin portals: `yarn dev`
+  - Member/Onboarding: `yarn start`
+- Test:
+  - Seat selection, guestlist, drops, checkout
+  - Admin dashboard and staff check-in
+  - All CI pipelines
+- Fix anything until the system is fully operational.
+
+---
+
+## Do Not
+
+- ❌ Ask questions during execution
+- ❌ Duplicate apps, screens, components, endpoints
+- ❌ Generate previews unless explicitly told
+- ❌ Skip updates to `task-list.md`
+- ❌ Hardcode sensitive data
+
+---
+
+## Goal
+
+- All phases in `cursor-prompt-ecosystem.json` are ✅ complete
+- All tasks in `task-list.md` are ✅ complete
+- All services are running locally with seeded content
+- The system is testable, CI-ready, and production-prepped
+
+---
+
+## Recovery After 25-Message Limit or Crash
+
+If Cursor is interrupted due to the 25-message execution limit, system crash, or session timeout:
+
+1. **Immediately Re-open** the project in Cursor.
+
+2. **Re-read `task-list.md`**
+   - Identify the **last successfully completed task**.
+   - Resume execution **from the next task**.
+   - DO NOT repeat already-completed tasks unless explicitly marked failed or incomplete.
+
+3. **Check `cursor-prompt-ecosystem.json`**
+   - Reconfirm the current phase.
+   - Resume where the phase left off.
+   - If `task-list.md` is missing or incomplete, **regenerate the task list** based on project structure and previously generated files.
+
+4. **Continue execution as normal**
+   - Do not prompt for re-approval.
+   - Do not ask whether to regenerate or restart.
+   - Trust the file state, resume, and **continue the loop**.
+
+5. **After recovery, append to `task-list.md`:**
+
+---
+
+## Code Review Rules
+
+### 🔍 General Review Principles
+
+1. **Be Thorough but Constructive**
+   - Review every line of code, but focus on helping the author improve.
+   - Avoid nitpicking unless it affects readability, performance, or long-term maintainability.
+
+2. **Prioritize Clarity Over Cleverness**
+   - Flag overly complex solutions. Favor clean, readable, and maintainable code.
+   - Ask: "Will a future dev understand this instantly?"
+
+3. **Assume Positive Intent**
+   - Approach each review with empathy. Offer suggestions, not demands.
+
+---
+
+### 🧠 Functional Correctness
+
+4. **Does the code do what it claims to do?**
+   - Check implementation against requirements or acceptance criteria.
+   - Review edge cases and fallback logic.
+
+5. **Are all new features covered by tests?**
+   - Ensure adequate unit, integration, and (if needed) E2E test coverage.
+   - Confirm meaningful assertions, not just execution.
+
+6. **Is error handling present and robust?**
+   - Validate proper try/catch blocks, null/undefined checks, and fallback behavior.
+
+---
+
+### 🧹 Code Quality
+
+7. **No commented-out code**
+   - Flag and request removal unless it's clearly marked TODO with context.
+
+8. **Check for DRY principles**
+   - Duplicate logic should be extracted into reusable functions or components.
+
+9. **Validate naming conventions**
+   - Variable, function, and component names should be descriptive, consistent, and aligned with project standards.
+
+10. **Review function and file sizes**
+    - Functions should be small, focused, and single-purpose. Large files should be split logically.
+
+---
+
+### 💄 Style & Consistency
+
+11. **Is code formatted and linted?**
+    - Ensure Prettier/ESLint/Husky or similar tools are passing.
+    - No inconsistent spacing, brace styles, or indentation.
+
+12. **Follow project conventions**
+    - Match directory structure, imports, folder naming (`kebab-case`, `PascalCase`, etc.), and design patterns.
+
+13. **Check for console.log/debug leftovers**
+    - No leftover logging or breakpoints in production code.
+
+---
+
+### 🧬 Architecture & Structure
+
+14. **Is the code modular and scalable?**
+    - Ensure it fits cleanly into the existing architecture.
+    - No tight coupling. Use dependency injection or hooks appropriately.
+
+15. **Does the code respect separation of concerns?**
+    - Business logic should be separated from UI and API layers.
+
+16. **Has state been managed properly?**
+    - Verify usage of state libraries (e.g., Recoil, Redux, Context) is clean and isolated.
+
+17. **Are APIs isolated in `/api/` and typed?**
+    - No direct fetch/axios calls in components.
+    - Validate correct usage of Swagger types if applicable.
+
+18. **Use Data Adapter Pattern for Data Access**
+    - Always use the data adapter pattern through `@core/data`'s `adapter()` function
+    - Never create direct database connections or wrappers
+    - Services should use the adapter directly:
+      ```typescript
+      import { adapter } from '@core/data'
+      
+      const db = adapter()
+      return db.get('entity', id)
+      ```
+    - The adapter handles all database operations and configuration
+    - No need for custom database classes or connection management
+
+---
+
+### 🧪 Testing & Coverage
+
+19. **Tests exist and are meaningful**
+    - Not just "smoke" tests. Ensure coverage of both success and failure paths.
+    - Look for descriptive test names and clean assertions.
+
+20. **Mock data used appropriately**
+    - Ensure mocking frameworks or stubs don't introduce false positives.
+
+21. **CI pipelines must pass**
+    - PRs should not be merged unless all test, lint, and build checks are green.
+
+---
+
+### ✅ Review Process Rules
+
+22. **One reviewer signs off is not enough**
+    - Require at least **2 approvals** unless it's a trivial change.
+
+23. **Never approve with "looks good"**
+    - Leave a comment summarizing what you reviewed and what was validated.
+
+24. **Every PR must include a changelog or context**
+    - Either in the PR description or commit message. Explain *why*, not just *what*.
+
+25. **Use GitHub suggestions where possible**
+    - Offer inline edits or improvements via suggestions to speed up implementation.
+
+26. **All comments must be resolved before merge**
+    - No unresolved threads unless explicitly deferred and documented.
+
+---

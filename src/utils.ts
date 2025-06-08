@@ -1,13 +1,4 @@
-import {
-	PutItemRequest,
-	QueryItemRequest,
-	DeleteItemRequest,
-	GetItemRequest,
-	ScanInputRequest
-} from './types'
-
-import reservedWords from './reserved'
-import { isEmpty } from 'lodash'
+// AWS SDK imports
 import {
 	AttributeValue,
 	DeleteItemInput,
@@ -17,6 +8,98 @@ import {
 	UpdateItemInput
 } from '@aws-sdk/client-dynamodb'
 
+// Third-party imports
+import { isEmpty } from 'lodash'
+
+// Internal imports
+import {
+	PutItemRequest,
+	QueryItemRequest,
+	DeleteItemRequest,
+	GetItemRequest,
+	ScanInputRequest,
+	Key,
+	DynamoKey,
+	UpdateItemRequest
+} from './types'
+import { allReservedWords } from './reserved'
+
+/**
+ * Convert a value to DynamoDB AttributeValue
+ * @param value The value to convert
+ * @returns {AttributeValue} The converted value
+ */
+export function toAttributeValue(
+	value: string | number | boolean | null | undefined | any[] | Record<string, any>
+): AttributeValue {
+	if (value === undefined || value === null) {
+		return { NULL: true }
+	}
+	if (typeof value === 'string') {
+		return { S: value }
+	}
+	if (typeof value === 'number') {
+		return { N: value.toString() }
+	}
+	if (typeof value === 'boolean') {
+		return { BOOL: value }
+	}
+	if (Array.isArray(value)) {
+		return { L: value.map(toAttributeValue) }
+	}
+	if (typeof value === 'object') {
+		const result: Record<string, AttributeValue> = {}
+		for (const [k, v] of Object.entries(value)) {
+			result[k] = toAttributeValue(v)
+		}
+		return { M: result }
+	}
+	throw new Error(`Unsupported type for value: ${value}`)
+}
+
+/**
+ * Convert a simple key to DynamoDB key
+ * @param key The simple key to convert
+ * @returns {DynamoKey} The converted DynamoDB key
+ */
+const toDynamoKey = (key: Key): Record<string, AttributeValue> => {
+	return Object.entries(key).reduce((acc, [k, v]) => {
+		if (v === undefined) {
+			return acc
+		}
+		if (v === null) {
+			return { ...acc, [k]: { NULL: true } }
+		}
+		if (typeof v === 'string') {
+			return { ...acc, [k]: { S: v } }
+		}
+		if (typeof v === 'number') {
+			return { ...acc, [k]: { N: String(v) } }
+		}
+		if (typeof v === 'boolean') {
+			return { ...acc, [k]: { BOOL: v } }
+		}
+		if (Array.isArray(v)) {
+			return { ...acc, [k]: { L: v.map(toAttributeValue) } }
+		}
+		if (typeof v === 'object') {
+			return {
+				...acc,
+				[k]: {
+					M: Object.entries(v).reduce(
+						(obj, [key, val]) => ({
+							...obj,
+							[key]: toAttributeValue(val)
+						}),
+						{}
+					)
+				}
+			}
+		}
+		return acc
+	}, {})
+}
+
 /**
  * Build Put Item Input for Dynamo DB operation
  * @param request
@@ -24,12 +107,12 @@ import {
  */
 export const buildPutInput = ({ tableName, params }: PutItemRequest): PutItemInput => ({
 	TableName: tableName,
-	Item: params as Record<string, AttributeValue> | undefined
+	Item: Object.entries(params).reduce((acc, [k, v]) => ({ ...acc, [k]: toAttributeValue(v) }), {})
 })
 
 /**
  * Build Scan Input for Dynamo DB operation
- * @param {any} request
+ * @param {ScanInputRequest} request
  * @returns {ScanInput}
  */
 export const buildScanInput = (request: ScanInputRequest) => {
@@ -41,58 +124,51 @@ export const buildScanInput = (request: ScanInputRequest) => {
 	if (request.startKey) {
 		options.ExclusiveStartKey = request.startKey
 	}
-	// create projection collections
-	const projection: string[] = []
-	// if request has params map
-	if (request.params) {
-		// get the param attribute names
-		const paramAttrs: string[] = Object.keys(request.params)
-		// create the filter express collection
-		const filterExpressions: string[] = []
-		// define the Expression Context
-		options.ExpressionAttributeNames = {}
-		options.ExpressionAttributeValues = {}
-		// loop through the attributes and format the request
-		paramAttrs.forEach((attr: string, index: number) => {
-			// create token string
-			const token: string = `#${attr}`
-			// push the token to the projection
-			projection.push(token)
-			// create filter string
-			let filter: string = `:${attr.charAt(0)}${index}`
 
-			// add attribute to expressions
+	// Handle projection expressions
+	if (request.output) {
+		options.ExpressionAttributeNames = {}
+		const projection = request.output.map((attr) => {
+			const token = `#${attr}`
 			options.ExpressionAttributeNames[token] = attr
-			// set value cache
-			const value = request.params[attr]
-			if (value) {
+			return token
+		})
+		options.ProjectionExpression = projection.join(', ')
+	}
+
+	// Handle filter expressions
+	if (request.params) {
+		options.ExpressionAttributeValues = {}
+		const filterExpressions: string[] = []
+
+		// Initialize ExpressionAttributeNames if not already done
+		if (!options.ExpressionAttributeNames) {
+			options.ExpressionAttributeNames = {}
+		}
+
+		Object.entries(request.params).forEach(([attr, value], index) => {
+			const token = `#${attr}`
+			const filter = `:${attr.charAt(0)}${index}`
+
+			options.ExpressionAttributeNames[token] = attr
+
+			if (value !== undefined) {
 				if (Array.isArray(value)) {
 					filterExpressions.push(`contains(${token}, ${filter})`)
-					options.ExpressionAttributeValues[filter] = value[0]
-				} else if (typeof value === 'string') {
+					options.ExpressionAttributeValues[filter] = toAttributeValue(value[0])
+				} else if (typeof value === 'string' || typeof value === 'number') {
 					filterExpressions.push(`${token} = ${filter}`)
-					options.ExpressionAttributeValues[filter] = value
-				} else if (typeof value === 'number') {
-					filterExpressions.push(`${token} = ${filter}`)
-					options.ExpressionAttributeValues[filter] = value
-				} else if (typeof value === 'object') {
-					// TODO: conditional scan
+					options.ExpressionAttributeValues[filter] = toAttributeValue(value)
 				}
 			}
 		})
-		const filterExpressionContext = options?.filterExpressionContext || 'And'
-		// set the filter expression
-		options.FilterExpression = filterExpressions.join(` ${filterExpressionContext} `)
+
+		if (filterExpressions.length > 0) {
+			const filterExpressionContext = request.options?.filterExpressionContext || 'And'
+			options.FilterExpression = filterExpressions.join(` ${filterExpressionContext} `)
+		}
 	}
-	// check to see if there are different projection attributes
-	if (request.output) {
-		const output = request.output.filter((x) => !request.params[x])
-		projection.push(...output)
-	}
-	// set the project expression
-	if (projection.length && options.Select !== 'ALL_ATTRIBUTES') {
-		options.ProjectionExpression = projection.join(', ')
-	}
+
 	return options
 }
 
@@ -100,45 +176,49 @@ export const buildScanInput = (request: ScanInputRequest) => {
  * Build Update Item Input for Dynamo DB operation
  * @param request
  */
-export const buildUpdateInput = (request: any): UpdateItemInput => {
-	const options: any = {
+export function buildUpdateInput(request: UpdateItemRequest): UpdateItemInput {
+	validateTableName(request.tableName)
+	if (request.key) {
+		validateKey(request.key)
+	}
+	if (request.params) {
+		validateObject(request.params, 'Params')
+	}
+
+	const ts = Date.now()
+	validateTimestamp(ts)
+
+	const params = {
+		...request.params,
+		updatedAt: ts
+	}
+
+	const names: Record<string, string> = {}
+	const values: Record<string, AttributeValue> = {}
+	const expressions: string[] = []
+
+	Object.entries(params).forEach(([key, value], index) => {
+		const nameKey = `#${key}`
+		const valueKey = `:${key.charAt(0)}${index}`
+		names[nameKey] = key
+		values[valueKey] = toAttributeValue(value)
+		expressions.push(`${nameKey} = ${valueKey}`)
+	})
+
+	return {
 		TableName: request.tableName,
 		Key: request.key,
 		ReturnValues: 'ALL_NEW',
-		ExpressionAttributeValues: {},
-		UpdateExpression: ''
+		ExpressionAttributeNames: names,
+		ExpressionAttributeValues: values,
+		UpdateExpression: `SET ${expressions.join(', ')}`
 	}
-	const updateExpressions: string[] = []
-	const paramAttrs: string[] = Object.keys(request.params)
-	const expressionNames: any = {}
-
-	paramAttrs.forEach((attr: string, index: number) => {
-		// create expression attribute filter
-		let filter: string = `:${attr.charAt(0)}${index}`
-		// get and assign the value
-		const value = request.params[attr]
-		options.ExpressionAttributeValues[filter] = value
-		// create the expression token
-		const token = `#${attr}`
-		expressionNames[token] = attr
-		// push the expression to the update expressions
-		updateExpressions.push(`${token} = ${filter}`)
-	})
-	if (!isEmpty(expressionNames)) {
-		options.ExpressionAttributeNames = expressionNames
-	}
-	const expressions = updateExpressions.join(', ')
-	options.UpdateExpression = `SET ${expressions}`
-
-	return options
 }
 
 /**
  * Build Query Item Input for dynamodb
- * @param {DeleteItemRequest} request
- * @param {string} request.tableName
- * @param {string} request.key
- * @returns {DeleteItemInput}
+ * @param {QueryItemRequest} request
+ * @returns {QueryInput}
  */
 export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
 	const options: QueryInput = {
@@ -164,9 +244,9 @@ export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
 			filter = `:${attr.charAt(0)}${attr.charAt(1)}`
 		}
 		const value = request.params[attr]
-		options.ExpressionAttributeValues[filter] = value
+		options.ExpressionAttributeValues[filter] = toAttributeValue(value)
 
-		const isReservedWord = reservedWords.includes(attr)
+		const isReservedWord = allReservedWords.includes(attr as any)
 		let token = attr
 		if (isReservedWord) {
 			token = `#${attr}`
@@ -184,8 +264,6 @@ export const buildQueryInput = (request: QueryItemRequest): QueryInput => {
 /**
  * Build Delete Item Input for dynamodb
  * @param {DeleteItemRequest} request
- * @param {string} request.tableName
- * @param {string} request.key
  * @returns {DeleteItemInput}
  */
 export const buildDeleteInput = (request: DeleteItemRequest): DeleteItemInput => ({
@@ -196,19 +274,42 @@ export const buildDeleteInput = (request: DeleteItemRequest): DeleteItemInput =>
 /**
  * Build Get Item Input for dynamodb
  * @param {GetItemRequest} request
- * @param {string} request.tableName
- * @param {string} request.key
- * @returns {DeleteItemInput}
+ * @returns {GetItemInput}
  */
 export const buildGetInput = (request: GetItemRequest): GetItemInput => ({
 	TableName: request.tableName,
-	Key: request.key as Record<string, AttributeValue> | undefined
+	Key: request.key
 })
 
 /**
- *
+ * Build key input for dynamodb
  * @param {string|number} key
+ * @returns {Record<string, AttributeValue>}
  */
-export const keyInput = (key): Record<string, AttributeValue> => ({
-	id: key
+export const keyInput = (key: string | number): Record<string, AttributeValue> => ({
+	id: toAttributeValue(key)
 })
+
+function validateTableName(tableName: string | undefined): void {
+	if (!tableName) {
+		throw new Error('TableName is required')
+	}
+}
+
+function validateKey(key: Record<string, any>): void {
+	if (!key || Object.keys(key).length === 0) {
+		throw new Error('Key is required and must not be empty')
+	}
+}
+
+function validateObject(obj: Record<string, any>, name: string): void {
+	if (!obj || Object.keys(obj).length === 0) {
+		throw new Error(`${name} is required and must not be empty`)
+	}
+}
+
+function validateTimestamp(ts: number): void {
+	if (!ts || isNaN(ts)) {
+		throw new Error('Invalid timestamp')
+	}
+}
