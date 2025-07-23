@@ -29,11 +29,10 @@ import {
 	buildQueryInput,
 	buildDeleteInput
 } from './utils'
-import { DynamoDb } from './DynamoDb'
 import Bulkify from './Bulkify'
 
+export * from './DynamoDb'
 export {
-	DynamoDb,
 	buildPutInput,
 	buildGetInput,
 	buildScanInput,

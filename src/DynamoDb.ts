@@ -63,6 +63,43 @@ import {
 	ResourceNotAuthorizedError
 } from './errors'
 
+export {
+	DeleteCommand,
+	DynamoDBDocumentClient,
+	GetCommand,
+	PutCommand,
+	QueryCommand,
+	UpdateCommand,
+	DynamoDBClient,
+	validateTableName,
+	validateKey,
+	validateTimestamp,
+	validateLimit,
+	validateNextToken,
+	validateFilterExpression,
+	validateProjectionExpression,
+	validateKeyConditionExpression,
+	validateUpdateExpression,
+	validateConditionExpression,
+	validateObject,
+	ItemExistsError,
+	ItemNotFoundError,
+	QueryError,
+	CreateError,
+	DeleteError,
+	UpdateError,
+	ConnectionError,
+	CredentialsError,
+	PermissionError,
+	RateLimitError,
+	TimeoutError,
+	ResourceNotFoundError,
+	ResourceInUseError,
+	ResourceNotAvailableError,
+	ResourceNotSupportedError,
+	ResourceNotAuthorizedError
+}
+
 /**
  * A class that provides a high-level interface for interacting with Amazon DynamoDB
  * @class
