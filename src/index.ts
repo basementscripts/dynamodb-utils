@@ -31,7 +31,6 @@ import {
 } from './utils'
 import Bulkify from './Bulkify'
 
-export * from './DynamoDb'
 export {
 	buildPutInput,
 	buildGetInput,
